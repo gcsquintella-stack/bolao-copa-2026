@@ -37,6 +37,7 @@ export function MatchCard({
   const [home, setHome] = useState<number | null>(initial?.home_score ?? null);
   const [away, setAway] = useState<number | null>(initial?.away_score ?? null);
   const [save, setSave] = useState<SaveState>("idle");
+  const [errMsg, setErrMsg] = useState<string | null>(null);
   const existsRef = useRef(initial != null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -55,9 +56,12 @@ export function MatchCard({
             .insert({ user_id: userId, match_id: match.id, home_score: h, away_score: a });
       if (error) {
         setSave("error");
+        setErrMsg(`${error.code ?? ""} ${error.message ?? ""}`.trim());
+        console.error("save prediction error", error);
         return;
       }
       existsRef.current = true;
+      setErrMsg(null);
       setSave("saved");
       setTimeout(() => setSave("idle"), 1500);
     },
@@ -149,7 +153,9 @@ export function MatchCard({
           </span>
         )}
         {save === "error" && (
-          <span className="text-destructive">erro ao salvar — tente de novo</span>
+          <span className="text-destructive">
+            erro ao salvar{errMsg ? `: ${errMsg}` : " — tente de novo"}
+          </span>
         )}
       </div>
     </div>
