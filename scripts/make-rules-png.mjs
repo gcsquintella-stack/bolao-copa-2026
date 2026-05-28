@@ -76,7 +76,8 @@ p.push(`<rect x="64" y="${y}" width="${W - 128}" height="1.5" fill="${C.soft}"/>
 y += 44;
 p.push(`<text x="64" y="${y}" font-family="${F}" font-size="22" fill="${C.muted}">Prorrogação e pênaltis não contam  ·  o palpite trava no apito  ·  ranking ao vivo</text>`);
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+const SCALE = 3; // renderiza em 3x p/ ficar nítido (viewBox mantém o layout)
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W * SCALE}" height="${H * SCALE}" viewBox="0 0 ${W} ${H}">
 <defs><radialGradient id="glow" cx="50%" cy="0%" r="70%">
 <stop offset="0%" stop-color="${C.green}" stop-opacity="0.16"/>
 <stop offset="60%" stop-color="${C.green}" stop-opacity="0"/></radialGradient></defs>
