@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
+import { AppNav } from "@/components/app-nav";
 
 export default async function AppLayout({
   children,
@@ -49,6 +50,9 @@ export default async function AppLayout({
               </Button>
             </form>
           </div>
+        </div>
+        <div className="mx-auto w-full max-w-3xl px-4 pb-2">
+          <AppNav />
         </div>
       </header>
 
