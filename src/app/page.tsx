@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Activity, Lock, ShieldCheck, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
@@ -68,10 +69,15 @@ export default function Home() {
         </p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button size="lg" className="px-8">
+          <Button render={<Link href="/login" />} size="lg" className="px-8">
             Entrar no bolão
           </Button>
-          <Button size="lg" variant="outline" className="px-8">
+          <Button
+            render={<Link href="/login" />}
+            size="lg"
+            variant="outline"
+            className="px-8"
+          >
             Como funciona
           </Button>
         </div>
