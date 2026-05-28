@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# S.M.M.A — Bolão Copa do Mundo 2026
 
-## Getting Started
+Plataforma web do bolão da Copa do Mundo FIFA 2026 entre amigos (grupo **S.M.M.A**). Mobile-first, dark mode, custo zero de operação, com integridade dos palpites garantida no banco de dados.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + **TypeScript**
+- **Tailwind CSS v4** + **shadcn/ui** (Base UI) — dark mode por padrão via `next-themes`
+- **Supabase** (Postgres + Auth + Realtime + Row Level Security) — _a configurar na Fase 2_
+- **Vercel** (Hobby) para deploy — _a configurar na Fase 1_
+- **API-Football** (api-sports.io, tier free) para apuração automática de resultados — _Fase 8_
+
+## Rodar localmente
+
+> Node.js está instalado de forma portátil em `%LOCALAPPDATA%\nodejs` (sem admin). Após reabrir o terminal, `node` e `npm` ficam no PATH automaticamente.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install      # instala dependências em ./node_modules (isolado por projeto)
+npm run dev      # http://localhost:3000
+npm run build    # build de produção (mesmo que a Vercel roda)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Variáveis de ambiente ficam em `.env.local` (NUNCA commitado — veja `.gitignore`). As chaves do Supabase entram na Fase 2.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Decisões de produto (resumo)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Pontuação base** (editável no admin, trava após o 1º jogo): cravada **10** · vencedor+saldo **6** · só resultado **3** · erro **0**.
+- **Multiplicadores mata-mata**: R32 ×1,5 · oitavas ×2 · quartas ×2,5 · semis+3º ×3 · final ×4.
+- **Bônus** (travam no apito da abertura): classificado de grupo **+3** cada · campeão **+30** · vice **+15** · artilheiro **+15** · revelação **+10**.
+- Vale o **placar dos 90 minutos** (prorrogação e pênaltis não contam).
+- **Integridade**: palpite oculto até o kickoff, imutável depois, garantido por RLS no Postgres. Admin não cria nem edita palpite de ninguém.
 
-## Learn More
+## Estrutura
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/            # rotas (App Router)
+  components/     # componentes (ui/ = shadcn)
+  lib/            # utilitários
+docs/             # brief original do projeto
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Fases de construção
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. ✅ Scaffold + deploy "hello world" na Vercel
+2. Schema + RLS (Supabase)
+3. Auth (magic link + Google) + onboarding
+4. Palpites + trava de kickoff
+5. Motor de pontuação + ranking realtime
+6. Palpites bônus
+7. Painel admin
+8. Integração API-Football (apuração automática + analytics)
+9. Polish UI + seed dos 104 jogos + checklist pré-Copa
