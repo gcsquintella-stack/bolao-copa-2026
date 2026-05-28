@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Trophy } from "lucide-react";
+import { CalendarDays, ShieldCheck, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -10,12 +10,15 @@ const LINKS = [
   { href: "/ranking", label: "Ranking", icon: Trophy },
 ];
 
-export function AppNav() {
+export function AppNav({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
+  const links = isAdmin
+    ? [...LINKS, { href: "/admin", label: "Admin", icon: ShieldCheck }]
+    : LINKS;
   return (
     <nav className="flex gap-1">
-      {LINKS.map(({ href, label, icon: Icon }) => {
-        const active = pathname === href;
+      {links.map(({ href, label, icon: Icon }) => {
+        const active = pathname === href || pathname.startsWith(href + "/");
         return (
           <Link
             key={href}

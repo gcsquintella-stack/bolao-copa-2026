@@ -52,7 +52,7 @@ export default async function AppLayout({
           </div>
         </div>
         <div className="mx-auto w-full max-w-3xl px-4 pb-2">
-          <AppNav />
+          <AppNav isAdmin={profile.role === "admin"} />
         </div>
       </header>
 
