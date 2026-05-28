@@ -200,11 +200,11 @@ create table public.scoring_config (
   mult_qf                 numeric(3,1) not null default 2.5,
   mult_sf                 numeric(3,1) not null default 3.0,
   mult_final              numeric(3,1) not null default 4.0,
-  bonus_group_qualifier   integer not null default 3,   -- por seleção classificada
-  bonus_champion          integer not null default 30,
-  bonus_runner_up         integer not null default 15,
-  bonus_top_scorer        integer not null default 15,
-  bonus_surprise          integer not null default 10,
+  bonus_group_qualifier   integer not null default 1,   -- por seleção classificada
+  bonus_champion          integer not null default 12,
+  bonus_runner_up         integer not null default 6,
+  bonus_top_scorer        integer not null default 6,
+  bonus_surprise          integer not null default 4,
   updated_at              timestamptz not null default now()
 );
 

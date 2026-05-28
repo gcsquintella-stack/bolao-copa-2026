@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, ShieldCheck, Trophy } from "lucide-react";
+import { CalendarDays, Sparkles, ShieldCheck, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "/jogos", label: "Jogos", icon: CalendarDays },
+  { href: "/bonus", label: "Bônus", icon: Sparkles },
   { href: "/ranking", label: "Ranking", icon: Trophy },
 ];
 

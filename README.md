@@ -26,7 +26,7 @@ Variáveis de ambiente ficam em `.env.local` (NUNCA commitado — veja `.gitigno
 
 - **Pontuação base** (editável no admin, trava após o 1º jogo): cravada **10** · vencedor+saldo **6** · só resultado **3** · erro **0**.
 - **Multiplicadores mata-mata**: R32 ×1,5 · oitavas ×2 · quartas ×2,5 · semis+3º ×3 · final ×4.
-- **Bônus** (travam no apito da abertura): classificado de grupo **+3** cada · campeão **+30** · vice **+15** · artilheiro **+15** · revelação **+10**.
+- **Bônus** (travam no apito da abertura; calibrados via simulação p/ serem critério de desempate, não fator decisório — ~5% do total): classificado de grupo **+1** cada · campeão **+12** · vice **+6** · artilheiro **+6** · revelação **+4**.
 - Vale o **placar dos 90 minutos** (prorrogação e pênaltis não contam).
 - **Integridade**: palpite oculto até o kickoff, imutável depois, garantido por RLS no Postgres. Admin não cria nem edita palpite de ninguém.
 
