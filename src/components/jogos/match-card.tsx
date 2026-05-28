@@ -40,12 +40,25 @@ export function MatchCard({
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const existsRef = useRef(initial != null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const savingRef = useRef(false);
+  const pendingRef = useRef<{ h: number; a: number } | null>(null);
 
   const persist = useCallback(
     async (h: number, a: number) => {
+      // serializa: um salvamento por vez; guarda o último valor pendente
+      if (savingRef.current) {
+        pendingRef.current = { h, a };
+        return;
+      }
+      savingRef.current = true;
       setSave("saving");
-      const exists = existsRef.current;
-      const { error } = exists
+
+      const wasExisting = existsRef.current;
+      // otimista: a partir daqui, qualquer salvamento seguinte é UPDATE
+      // (evita INSERT duplicado se dois dispararem juntos)
+      existsRef.current = true;
+
+      const { error } = wasExisting
         ? await supabase
             .from("predictions")
             .update({ home_score: h, away_score: a })
@@ -54,16 +67,27 @@ export function MatchCard({
         : await supabase
             .from("predictions")
             .insert({ user_id: userId, match_id: match.id, home_score: h, away_score: a });
+
+      savingRef.current = false;
+
       if (error) {
+        existsRef.current = wasExisting; // reverte o flag otimista em caso de falha
         setSave("error");
         setErrMsg(`${error.code ?? ""} ${error.message ?? ""}`.trim());
         console.error("save prediction error", error);
         return;
       }
-      existsRef.current = true;
+
       setErrMsg(null);
       setSave("saved");
       setTimeout(() => setSave("idle"), 1500);
+
+      // se chegou um valor novo enquanto salvava, salva de novo (agora como UPDATE)
+      if (pendingRef.current) {
+        const p = pendingRef.current;
+        pendingRef.current = null;
+        persist(p.h, p.a);
+      }
     },
     [supabase, userId, match.id],
   );
