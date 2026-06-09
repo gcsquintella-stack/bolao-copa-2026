@@ -26,6 +26,9 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write # pra abrir uma Issue se o sync falhar
     steps:
       - uses: actions/checkout@v4
 
@@ -47,3 +50,29 @@ jobs:
         run: |
           node scripts/sync-espn.mjs "$(date -u -d 'yesterday' +%Y%m%d)"
           node scripts/sync-espn.mjs
+
+      # Se qualquer passo acima falhar, abre uma Issue no repo (mais difícil de
+      # ignorar que email). Dedup: só cria se não houver uma Issue aberta com o
+      # rótulo `sync-failure` — evita spam quando a falha persiste por várias
+      # rodadas. Feche a Issue ao resolver; a próxima falha abre uma nova.
+      - name: Abrir Issue se o sync falhar
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = 'sync-failure';
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: label,
+            });
+            if (open.data.length > 0) return; // já tem uma aberta
+            const url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 sync-espn falhou',
+              labels: [label],
+              body: `O sync da ESPN falhou. Veja os logs: ${url}\n\nEnquanto não resolver, lance resultados manualmente em /admin/resultados. Feche esta Issue quando o sync voltar a passar.`,
+            });
