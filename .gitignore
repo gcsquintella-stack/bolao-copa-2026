@@ -37,6 +37,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# backups locais (contêm dados de usuários — nunca commitar; repo é público)
+/backups/
+
 # claude code local tooling (machine-specific)
 .claude/
 
