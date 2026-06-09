@@ -1,0 +1,49 @@
+name: sync-espn
+
+# Sincroniza os resultados da Copa (API pública da ESPN) para o nosso banco.
+# Roda o scripts/sync-espn.mjs, que grava os placares dos 90 min em `matches`
+# (status='finished') e dispara a apuração + ranking pelo trigger do Postgres.
+#
+# Repo público => minutos de Actions grátis e ilimitados.
+# A senha de escrita vem do GitHub Secret SUPABASE_DB_PASSWORD (Settings >
+# Secrets and variables > Actions). A ESPN não usa chave.
+
+on:
+  schedule:
+    # A cada 10 min (horário UTC). O GitHub pode atrasar/agrupar rodadas
+    # agendadas em horário de pico (pode virar ~10-20 min) — o admin sempre
+    # pode lançar manualmente. Pra estreitar só pro horário dos jogos, troque
+    # por algo como "*/10 14-23,0-8 * * *".
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {} # permite rodar à mão pela aba Actions
+
+# Não deixa duas rodadas se sobreporem se uma demorar mais que o intervalo.
+concurrency:
+  group: sync-espn
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci
+
+      # Sincroniza ONTEM e HOJE (UTC). Os jogos da Copa cruzam fusos UTC-7 a
+      # UTC-4, então um jogo de fim de noite cai no "dia UTC seguinte"; cobrir
+      # os dois dias garante que nenhum escape na virada de data. Re-gravar um
+      # resultado já final é idempotente (mesmos valores, trigger recalcula
+      # igual), então rodar a cada 10 min não causa efeito colateral.
+      - name: Sincronizar ESPN (ontem + hoje, UTC)
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          node scripts/sync-espn.mjs "$(date -u -d 'yesterday' +%Y%m%d)"
+          node scripts/sync-espn.mjs
