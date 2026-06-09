@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { JogosClient } from "@/components/jogos/jogos-client";
+import { RealtimeRefresher } from "@/components/realtime-refresher";
 import type { MatchRow, PredictionRow, TeamRef } from "@/components/jogos/types";
+import { parseScoringConfig } from "@/lib/scoring";
 
 export const dynamic = "force-dynamic";
 
@@ -17,19 +19,23 @@ export default async function JogosPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: rawMatches }, { data: preds }] = await Promise.all([
-    supabase
-      .from("matches")
-      .select(
-        "id, stage, group_label, home_label, away_label, kickoff_at, venue, status, home_score, away_score, home:teams!home_team_id(name,code,flag), away:teams!away_team_id(name,code,flag)",
-      )
-      .order("kickoff_at", { ascending: true })
-      .order("id", { ascending: true }),
-    supabase
-      .from("predictions")
-      .select("match_id, home_score, away_score")
-      .eq("user_id", user!.id),
-  ]);
+  const [{ data: rawMatches }, { data: preds }, { data: cfg }] =
+    await Promise.all([
+      supabase
+        .from("matches")
+        .select(
+          "id, stage, group_label, home_label, away_label, kickoff_at, venue, status, home_score, away_score, home:teams!home_team_id(name,code,flag), away:teams!away_team_id(name,code,flag)",
+        )
+        .order("kickoff_at", { ascending: true })
+        .order("id", { ascending: true }),
+      supabase
+        .from("predictions")
+        .select("match_id, home_score, away_score, points")
+        .eq("user_id", user!.id),
+      supabase.from("scoring_config").select("*").eq("id", true).single(),
+    ]);
+
+  const scoring = parseScoringConfig(cfg);
 
   const matches: MatchRow[] = (rawMatches ?? []).map((m) => ({
     id: m.id,
@@ -50,6 +56,7 @@ export default async function JogosPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <RealtimeRefresher />
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Jogos</h1>
         <p className="text-sm text-muted-foreground">
@@ -67,6 +74,7 @@ export default async function JogosPage() {
           matches={matches}
           predictions={predictions}
           userId={user!.id}
+          scoring={scoring}
         />
       )}
     </div>

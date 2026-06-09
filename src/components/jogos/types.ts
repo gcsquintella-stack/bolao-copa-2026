@@ -25,6 +25,7 @@ export type PredictionRow = {
   match_id: number;
   home_score: number;
   away_score: number;
+  points?: number | null;
 };
 
 export const STAGE_LABEL: Record<MatchStage, string> = {

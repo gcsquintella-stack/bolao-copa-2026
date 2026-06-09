@@ -34,7 +34,10 @@ export async function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isPublic =
-    path === "/" || path === "/login" || path.startsWith("/auth");
+    path === "/" ||
+    path === "/login" ||
+    path === "/regras" ||
+    path.startsWith("/auth");
 
   // Deslogado tentando acessar área protegida -> login
   if (!user && !isPublic) {

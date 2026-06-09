@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { ScoringForm } from "../scoring-form";
 import type { ScoringValues } from "../actions";
+import { tournamentStarted } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export default async function AdminPontuacaoPage() {
     .order("kickoff_at", { ascending: true })
     .limit(1)
     .single();
-  const locked = first ? Date.now() >= new Date(first.kickoff_at).getTime() : false;
+  const locked = tournamentStarted(first?.kickoff_at);
 
   const initial: ScoringValues = {
     points_exact: cfg?.points_exact ?? 10,

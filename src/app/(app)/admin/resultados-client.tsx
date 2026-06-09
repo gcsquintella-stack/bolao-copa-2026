@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { MatchRow } from "@/components/jogos/types";
 import { ResultRow } from "./result-row";
+import { nowMs } from "@/lib/time";
 
 type Filter = "comecaram" | "lancados" | "todos";
 
@@ -27,7 +28,7 @@ export function ResultadosClient({ matches }: { matches: MatchRow[] }) {
   const [query, setQuery] = useState("");
 
   const visible = useMemo(() => {
-    const now = Date.now();
+    const now = nowMs();
     const q = query.trim().toLowerCase();
     return matches.filter((m) => {
       const started = now >= new Date(m.kickoff_at).getTime();

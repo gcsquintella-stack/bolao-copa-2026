@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { BonusForm, type BonusTeam } from "./bonus-form";
+import { tournamentStarted } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
@@ -11,13 +12,13 @@ export default async function BonusPage() {
 
   const [{ data: teams }, { data: bp }, { data: bg }, { data: first }] =
     await Promise.all([
-      supabase.from("teams").select("id, name, flag, group_label").order("group_label").order("name"),
+      supabase.from("teams").select("id, name, code, flag, group_label").order("group_label").order("name"),
       supabase.from("bonus_predictions").select("*").eq("user_id", user!.id).maybeSingle(),
       supabase.from("bonus_group_predictions").select("group_label, team_a_id, team_b_id").eq("user_id", user!.id),
       supabase.from("matches").select("kickoff_at").order("kickoff_at", { ascending: true }).limit(1).single(),
     ]);
 
-  const locked = first ? Date.now() >= new Date(first.kickoff_at).getTime() : false;
+  const locked = tournamentStarted(first?.kickoff_at);
 
   const groups: Record<string, { a: number | null; b: number | null }> = {};
   for (const row of bg ?? []) {

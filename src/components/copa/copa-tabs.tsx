@@ -1,0 +1,46 @@
+"use client";
+
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Standings } from "./standings";
+import { Bracket } from "./bracket";
+import type { StandingRow } from "@/lib/standings";
+import type { MatchRow } from "@/components/jogos/types";
+
+export function CopaTabs({
+  groups,
+  knockout,
+}: {
+  groups: { group: string; rows: StandingRow[] }[];
+  knockout: MatchRow[];
+}) {
+  const [tab, setTab] = useState<"grupos" | "mata">("grupos");
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex gap-1 rounded-xl bg-secondary p-1">
+        {(["grupos", "mata"] as const).map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTab(t)}
+            className={cn(
+              "flex-1 rounded-lg py-2 text-sm font-semibold transition-colors",
+              tab === t
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {t === "grupos" ? "Grupos" : "Mata-mata"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "grupos" ? (
+        <Standings groups={groups} />
+      ) : (
+        <Bracket matches={knockout} />
+      )}
+    </div>
+  );
+}

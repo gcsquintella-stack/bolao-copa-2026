@@ -1,17 +1,20 @@
 # Handoff — Bolão Copa 2026 (S.M.M.A)
 
-> Onde paramos, como rodar e o que falta. Atualizado em 2026-05-28.
+> Onde paramos, como rodar e o que falta. Atualizado em 2026-06-09.
 
 ## O que é
-Plataforma web de bolão da Copa do Mundo 2026 entre amigos (grupo **S.M.M.A**), valendo dinheiro. Mobile-first, dark mode, custo zero, integridade dos palpites garantida por RLS.
+Plataforma web de bolão da Copa do Mundo 2026 entre amigos (grupo **S.M.M.A**), valendo dinheiro. Mobile-first, **light / off-white + azul (Direção D)**, custo zero, integridade dos palpites garantida por RLS.
 
 - **Produção:** https://bolao-copa-2026-theta-kohl.vercel.app
 - **Repo:** https://github.com/gcsquintella-stack/bolao-copa-2026 (branch `main`, deploy automático na Vercel a cada push)
 - **Stack:** Next.js 16 (App Router) + TS · Tailwind v4 + shadcn (Base UI) · Supabase (Postgres+Auth+Realtime+RLS) · Vercel · fonte de resultados = **API pública da ESPN**.
 
 ## Estado atual (fases)
-- ✅ **1** scaffold + deploy · **2** schema + RLS (provado) · **3** auth magic link + onboarding · **4** 104 jogos + tela de palpites + trava no apito · **5** pontuação automática + ranking ao vivo · **6** palpites bônus (jogador) + apuração/revelação (provado) · **7** painel admin (resultados + pontuação).
-- 🔧 **8** motor de resultados ESPN **pronto e provado** (de-para 104/104, sync extrai 90 min) — **falta só agendar (cron) + segredo de escrita em produção**.
+- ✅ **1–7** scaffold/deploy · schema+RLS · auth (magic link **+ Google OAuth ATIVO em prod**) · 104 jogos + palpites + trava · pontuação automática + ranking ao vivo · bônus (jogador) + apuração/revelação · painel admin.
+- 🔧 **8** motor de resultados ESPN **pronto e provado** (de-para 104/104, sync extrai 90 min) — **falta só agendar (cron) + segredo de escrita** (ver "Próximos passos").
+- ✅ **9 — Identidade visual (Direção D), COMPLETA:** light/off-white + azul, fontes Inter+Fraunces, **bandeiras circulares** (circle-flags em `public/flags/`), **nomes PT-BR** (migration 0010), ranking com **pódio**, **pontos no card** (encerrado + ao vivo + multiplicador de mata-mata), **realtime na /jogos**, bônus com **dropdown de bandeiras** (Base UI Select), login, **shell responsivo** (top nav web-native — sem chrome de app), **motion** (confete na cravada / count-up / entrada escalonada; respeita reduced-motion).
+- ✅ **Página de Regras** (`/regras`, **aba no nav** + pública) · **Hub da Copa** (`/copa`: abas **Grupos** [classificação calculada] + **Mata-mata** [chaveamento com placeholders humanizados]).
+- ⚠️ **Tudo de 9 + Regras + Copa está em BRANCH, não em produção** — ver "Próximos passos".
 
 ## Como rodar / desenvolver (Windows, sem admin)
 - Node é **portátil** em `%LOCALAPPDATA%\nodejs` (sem admin). Em terminal novo já está no PATH; em sessões antigas, prefixe `$env:Path = "$env:LOCALAPPDATA\nodejs;$env:Path"`.
@@ -28,14 +31,24 @@ Plataforma web de bolão da Copa do Mundo 2026 entre amigos (grupo **S.M.M.A**),
 - **Classificados de grupo:** conta o par (sem ordem). **Artilheiro:** texto por enquanto (picklist de jogadores é follow-up #16).
 - **Fonte de resultados:** ESPN (`site.api.espn.com/.../soccer/fifa.world/scoreboard` e `/summary`). 90 min = períodos 1+2 do `/summary`. Não-oficial → admin é autoridade final.
 
-## Pendências (retomar daqui)
-- **Operacional p/ a Copa (perto de junho):** #14 agendar o sync (cron — Supabase Edge Function+pg_cron, GitHub Actions, ou cron externo) + segredo de escrita em prod (service key OU connection string) · #15 admin lançar respostas oficiais dos bônus + rodar `score_bonus()` · #16 picklist do artilheiro (quando saírem as convocações).
-- **Fase 9 — acabamento:** #11 bandeiras como imagem (emoji vira código de 2 letras no Windows) + nomes em PT-BR · PWA · checklist pré-Copa · guia de admin no README.
-- **Adiados por decisão do usuário:** login Google (estrutura pronta, botão dormindo) · #12 variação ↑↓ no ranking (precisa snapshots) · #13 convite/aprovação de participantes (hoje signup é aberto).
-- 🔐 **Resetar a senha do banco** antes do lançamento (passou pelo chat durante o setup).
+## Próximos passos (RETOMAR DAQUI — em ordem)
+> **⚠️ Trabalho desta sessão (Fase 9 + Regras + Copa) está na branch `feat/visual-fase9-regras-copa`, COMMITADO mas NÃO pushado.** Limpeza já feita (styleguide `/design` removido, proxy revertido — só `/regras` ficou público permanente). `next build` / lint / tsc **verdes** = deploy-ready. Pra continuar: `git checkout feat/visual-fase9-regras-copa`.
+
+1. **Deploy:** revisar a branch → merge em `main` → **push** (Vercel deploya). Depois **smoke test** em produção: criar usuário, palpitar, lançar placar fake no admin, ver pontos no card + ranking + /copa atualizarem (e ver confete/count-up ao vivo). Reverter o placar fake.
+2. **#14 cron ESPN + segredo de escrita** (LAUNCH-CRITICAL, antes de 11/jun): agendar `scripts/sync-espn.mjs`. Recomendado: **GitHub Actions cron** (~a cada 5-10 min; segredo `SUPABASE_DB_PASSWORD` nos GH Secrets) — reusa o script já provado. Alternativa: Supabase Edge Function + pg_cron (frequência maior, mais setup). ESPN é sem chave. **Guiar o usuário click-by-click no painel.**
+3. **Hardening / "bulletproof":** backup periódico dos palpites; **ensaio geral** (rodar o sync de um jogo passado em prod → pontuação → ranking, ao vivo); alerta simples se o sync falhar. Risco real = **integridade/recuperação**, NÃO carga (são ~15 amigos). Admin é a rede de segurança (corrige placar na mão; re-scoring é idempotente).
+4. **Analytics — breakdown no ranking** (código solo): expandir a linha do jogador → ver jogo a jogo (palpite × resultado × pontos) + bônus + nº de cravadas. **Respeita RLS** (só mostra palpites de jogos já travados/encerrados). Dados já existem (`predictions.points`).
+5. **#15** admin lançar respostas oficiais dos bônus + rodar `score_bonus()` · **#16** picklist do artilheiro (quando saírem as convocações).
+
+**Adiados (sem prejuízo):** PWA · #12 variação ↑↓ no ranking (precisa snapshots) · #13 convite/aprovação de participantes (hoje signup aberto) · 🔐 resetar senha do banco (**decisão do usuário: NÃO mexer agora**).
 
 ## Gotchas do Next 16 / stack
 - Middleware agora é **`proxy.ts`** (função `proxy`). `cookies()` é **assíncrono**.
-- shadcn aqui é **Base UI**: `Button` usa prop **`render`** (não `asChild`).
-- Emoji de bandeira **não renderiza no Windows** (mostra 2 letras) — usar imagem (#11).
-- Migrations em `supabase/migrations/` (0001→0009). Testes em `supabase/tests/` (rollback, mostram "OK >>>" via exceção proposital). Dados de seed em `supabase/seed-data/`.
+- shadcn aqui é **Base UI**: `Button` usa prop **`render`** (não `asChild`). Select custom usa `@base-ui/react/select` (ver `bonus-form.tsx`).
+- ✅ Bandeiras resolvidas: **circle-flags** (SVG circular em `public/flags/`), componente `<Flag code>` em `components/ui/flag.tsx`, de-para FIFA→ISO em `src/lib/flags.ts`. (Emoji de bandeira quebra no Windows — não usar.)
+- **Fontes (Direção D):** Inter (sans) + Fraunces (serif → use `font-serif`/`font-heading`). **GOTCHA:** `@theme inline --font-sans: var(--font-inter)` NÃO gera a utility aqui (cai em Times New Roman) → fontes bindadas **direto** no `globals.css` (`html{font-family:var(--font-inter)…}` + classes sem-layer `.font-serif`/`.font-heading`).
+- **Helpers novos:** `lib/time.ts` (leituras de tempo FORA do render — regra `react-hooks/purity`), `lib/scoring.ts` (espelho TS do motor `0006`, p/ pontos no card), `lib/standings.ts` (classificação), `components/realtime-refresher.tsx` (compartilhado ranking+jogos), `components/count-up.tsx`.
+- **Lint estrito:** regras `react-hooks/purity` (proíbe `Date.now()`/`new Date()` no render) e `set-state-in-effect` ativas. Mantém **lint 0 / tsc 0**.
+- **QA visual:** o styleguide `/design` foi **removido** (era TEMP). Pra QA de UI nova: recriar rota `/design/*` temporária (liberar no `proxy.ts` isPublic, e **remover antes do commit**). O preview do Claude **trava a captura** quando o renderer satura → reiniciar o preview server resolve. Páginas autenticadas: criar styleguide mock dos componentes reais.
+- **Migrations** em `supabase/migrations/` (0001→**0010**; 0010 = nomes PT-BR, aplicado). Testes em `supabase/tests/`. Seed em `supabase/seed-data/`. Mata-mata no seed usa placeholders `2A`/`1C`/`3A/B/..`/`W73`/`L101`.
+- Dep nova: **`canvas-confetti`** (confete na cravada, import dinâmico).

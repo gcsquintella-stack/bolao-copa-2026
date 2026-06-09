@@ -7,9 +7,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-fraunces);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-fraunces);
+  --color-positive: var(--positive);
+  --color-positive-foreground: var(--positive-foreground);
+  --color-live: var(--live);
+  --color-live-foreground: var(--live-foreground);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,73 +53,86 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ============================================================
+   Direção D — "Mix": Refinado Sereno + acentos Sport Clean.
+   Light/azul como padrão. Cores em hex (fiéis ao mockup aprovado).
+   ============================================================ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.58 0.16 150);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.58 0.16 150);
-  --chart-1: oklch(0.62 0.17 150);
-  --chart-2: oklch(0.7 0.15 85);
-  --chart-3: oklch(0.6 0.18 25);
-  --chart-4: oklch(0.55 0.16 265);
-  --chart-5: oklch(0.65 0.15 320);
-  --radius: 0.75rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: #FAFBFC;
+  --foreground: #0B1220;
+  --card: #FFFFFF;
+  --card-foreground: #0B1220;
+  --popover: #FFFFFF;
+  --popover-foreground: #0B1220;
+  --primary: #2456E6;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EAF0FF;
+  --secondary-foreground: #243C7A;
+  --muted: #F2F4F8;
+  --muted-foreground: #586072;
+  --accent: #EAF0FF;
+  --accent-foreground: #243C7A;
+  --destructive: #E5484D;
+  --positive: #16A34A;
+  --positive-foreground: #FFFFFF;
+  --live: #E5484D;
+  --live-foreground: #FFFFFF;
+  --border: #EAEDF2;
+  --input: #E3E7EE;
+  --ring: #2456E6;
+  --chart-1: #2456E6;
+  --chart-2: #16A34A;
+  --chart-3: #E5484D;
+  --chart-4: #3B5B7A;
+  --chart-5: #F4B740;
+  --radius: 0.9rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0B1220;
+  --sidebar-primary: #2456E6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #EAF0FF;
+  --sidebar-accent-foreground: #243C7A;
+  --sidebar-border: #EAEDF2;
+  --sidebar-ring: #2456E6;
 }
 
+/* Companheiro escuro (navy) — secundário; só aparece se o tema for alternado. */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.72 0.18 152);
-  --primary-foreground: oklch(0.16 0.03 152);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.72 0.18 152);
-  --chart-1: oklch(0.72 0.18 152);
-  --chart-2: oklch(0.78 0.15 85);
-  --chart-3: oklch(0.68 0.19 25);
-  --chart-4: oklch(0.65 0.17 265);
-  --chart-5: oklch(0.72 0.15 320);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #0B1220;
+  --foreground: #EAEEF6;
+  --card: #121A2B;
+  --card-foreground: #EAEEF6;
+  --popover: #121A2B;
+  --popover-foreground: #EAEEF6;
+  --primary: #6E97FF;
+  --primary-foreground: #0B1220;
+  --secondary: #1B2740;
+  --secondary-foreground: #EAEEF6;
+  --muted: #18223A;
+  --muted-foreground: #9AA6BF;
+  --accent: #1B2740;
+  --accent-foreground: #EAEEF6;
+  --destructive: #F2696D;
+  --positive: #3FCB7A;
+  --positive-foreground: #06210F;
+  --live: #F2696D;
+  --live-foreground: #2A0A0B;
+  --border: rgba(255, 255, 255, 0.10);
+  --input: rgba(255, 255, 255, 0.14);
+  --ring: #6E97FF;
+  --chart-1: #6E97FF;
+  --chart-2: #3FCB7A;
+  --chart-3: #F2696D;
+  --chart-4: #8FB0D6;
+  --chart-5: #F4C770;
+  --sidebar: #121A2B;
+  --sidebar-foreground: #EAEEF6;
+  --sidebar-primary: #6E97FF;
+  --sidebar-primary-foreground: #0B1220;
+  --sidebar-accent: #1B2740;
+  --sidebar-accent-foreground: #EAEEF6;
+  --sidebar-border: rgba(255, 255, 255, 0.10);
+  --sidebar-ring: #6E97FF;
 }
 
 @layer base {
@@ -125,6 +143,54 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    /* Bind direto na variável do next/font (Inter). Não dependemos do token
+       `font-sans` do @theme porque o Tailwind não enxerga as vars do next/font
+       em build (elas são injetadas no <html> em runtime). */
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+/* Utilities de fonte sem cascade layer → vencem as do Tailwind e usam as
+   variáveis do next/font diretamente (robusto contra o token vazio do @theme). */
+.font-serif,
+.font-heading {
+  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
+}
+.font-mono {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+/* ---- motion / deleite (Fase 9.5) ---- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pop {
+  0% {
+    transform: scale(1.18);
+  }
+  60% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-fade-up {
+  animation: fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-pop {
+  animation: pop 0.22s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-pop {
+    animation: none;
   }
 }

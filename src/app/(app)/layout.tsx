@@ -34,7 +34,7 @@ export default async function AppLayout({
               <Trophy className="size-4" />
             </span>
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold tracking-tight">
+              <span className="font-serif text-base font-semibold tracking-tight">
                 S.M.M.A
               </span>
               <span className="text-xs text-muted-foreground">

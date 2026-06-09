@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { MatchCard } from "./match-card";
 import type { MatchRow, PredictionRow } from "./types";
+import type { ScoringConfig } from "@/lib/scoring";
+import { nowMs, nowDate } from "@/lib/time";
 
 type Filter = "todos" | "hoje" | "live" | "abertos" | "salvos" | "encerrados";
 
@@ -42,10 +44,12 @@ export function JogosClient({
   matches,
   predictions,
   userId,
+  scoring,
 }: {
   matches: MatchRow[];
   predictions: PredictionRow[];
   userId: string;
+  scoring: ScoringConfig;
 }) {
   const [filter, setFilter] = useState<Filter>("todos");
   const [query, setQuery] = useState("");
@@ -56,10 +60,10 @@ export function JogosClient({
     return map;
   }, [predictions]);
 
-  const todayBrt = brtDate.format(new Date());
+  const todayBrt = brtDate.format(nowDate());
 
   const visible = useMemo(() => {
-    const now = Date.now();
+    const now = nowMs();
     const q = query.trim().toLowerCase();
     return matches.filter((m) => {
       const ts = new Date(m.kickoff_at).getTime();
@@ -129,13 +133,19 @@ export function JogosClient({
             <h2 className="px-1 text-sm font-semibold capitalize text-muted-foreground">
               {g.label}
             </h2>
-            {g.items.map((m) => (
-              <MatchCard
+            {g.items.map((m, i) => (
+              <div
                 key={m.id}
-                match={m}
-                initial={predByMatch.get(m.id) ?? null}
-                userId={userId}
-              />
+                className="animate-fade-up"
+                style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
+              >
+                <MatchCard
+                  match={m}
+                  initial={predByMatch.get(m.id) ?? null}
+                  userId={userId}
+                  scoring={scoring}
+                />
+              </div>
             ))}
           </div>
         ))

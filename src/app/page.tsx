@@ -73,7 +73,7 @@ export default function Home() {
             Entrar no bolão
           </Button>
           <Button
-            render={<Link href="/login" />}
+            render={<Link href="/regras" />}
             size="lg"
             variant="outline"
             className="px-8"
@@ -97,7 +97,13 @@ export default function Home() {
       </section>
 
       <footer className="mx-auto w-full max-w-6xl px-6 py-8 text-center text-sm text-muted-foreground">
-        Em construção · Fase 1 — scaffold no ar
+        S.M.M.A · Bolão da Copa do Mundo 2026 ·{" "}
+        <Link
+          href="/regras"
+          className="font-medium text-foreground hover:text-primary"
+        >
+          Regras
+        </Link>
       </footer>
     </main>
   );
