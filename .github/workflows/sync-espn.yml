@@ -50,6 +50,7 @@ jobs:
         run: |
           node scripts/sync-espn.mjs "$(date -u -d 'yesterday' +%Y%m%d)"
           node scripts/sync-espn.mjs
+          node scripts/resolve-teams.mjs --apply
 
       # Se qualquer passo acima falhar, abre uma Issue no repo (mais difícil de
       # ignorar que email). Dedup: só cria se não houver uma Issue aberta com o
