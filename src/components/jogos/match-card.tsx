@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, Loader2, Lock, Minus, Plus } from "lucide-react";
+import { Check, Loader2, Lock, Minus, Plus, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Flag } from "@/components/ui/flag";
@@ -13,6 +13,7 @@ import {
   type ScoringConfig,
 } from "@/lib/scoring";
 import { STAGE_LABEL, type MatchRow, type PredictionRow } from "./types";
+import { MatchConsensus } from "./match-consensus";
 
 const brt = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "America/Sao_Paulo",
@@ -51,6 +52,7 @@ export function MatchCard({
   // palpite efetivamente persistido (controla o azul "cheio" do tile). Só vira
   // true no sucesso e nunca volta a false ao editar -> sem flicker.
   const [saved, setSaved] = useState(initial != null);
+  const [showGroup, setShowGroup] = useState(false);
   const existsRef = useRef(initial != null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savingRef = useRef(false);
@@ -284,6 +286,33 @@ export function MatchCard({
           </span>
         )}
       </div>
+
+      {/* palpites do grupo — só depois do apito (RLS libera os palpites alheios) */}
+      {locked && (
+        <div className="mt-1">
+          <button
+            type="button"
+            onClick={() => setShowGroup((v) => !v)}
+            aria-expanded={showGroup}
+            className="flex w-full items-center justify-center gap-1.5 rounded-md py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Users className="size-3.5" />
+            {showGroup ? "ocultar palpites do grupo" : "ver palpites do grupo"}
+          </button>
+          {showGroup && (
+            <MatchConsensus
+              matchId={match.id}
+              homeName={match.home?.name ?? match.home_label ?? "Casa"}
+              awayName={match.away?.name ?? match.away_label ?? "Fora"}
+              result={
+                isFinished && hasResult
+                  ? { home: match.home_score!, away: match.away_score! }
+                  : null
+              }
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
