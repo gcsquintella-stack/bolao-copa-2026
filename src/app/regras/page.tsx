@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Crown, Lock, Medal, Sparkles, Target, Trophy, Users } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { AppShell } from "@/components/app-shell";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Regras · Bolão Copa 2026",
@@ -56,20 +60,9 @@ function Section({
   );
 }
 
-export default function RegrasPage() {
+function RulesContent() {
   return (
-    <main className="mx-auto w-full max-w-2xl px-5 py-8">
-      <div className="mb-7">
-        <Link href="/" className="inline-flex items-center gap-2.5">
-          <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-            <Trophy className="size-4" />
-          </span>
-          <span className="font-serif text-base font-semibold tracking-tight">
-            S.M.M.A
-          </span>
-        </Link>
-      </div>
-
+    <>
       <h1 className="font-serif text-3xl italic">Como funciona</h1>
       <p className="mt-2 text-pretty text-muted-foreground">
         Você palpita no placar dos jogos e nos bônus do torneio. Vale só o
@@ -121,8 +114,8 @@ export default function RegrasPage() {
 
       <Section icon={<Sparkles className="size-5" />} title="Bônus do torneio">
         <p className="mb-1 text-sm text-muted-foreground">
-          Apostas do campeonato inteiro — valem como tempero e desempate.
-          Travam no apito do 1º jogo da Copa.
+          Apostas do campeonato inteiro — valem como tempero e desempate. Travam
+          no apito do 1º jogo da Copa.
         </p>
         <div className="divide-y divide-border">
           <Rule label="Campeão" chip="12" />
@@ -173,7 +166,60 @@ export default function RegrasPage() {
           </li>
         </ul>
       </Section>
+    </>
+  );
+}
 
+export default async function RegrasPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let profile: { display_name: string; role: string } | null = null;
+  if (user) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("display_name, role")
+      .eq("id", user.id)
+      .single();
+    profile = data;
+  }
+
+  // Logado: dentro do esqueleto do app, com a navegação por abas (pode transitar).
+  if (profile) {
+    return (
+      <AppShell
+        displayName={profile.display_name}
+        isAdmin={profile.role === "admin"}
+      >
+        <div className="mx-auto w-full max-w-2xl">
+          <RulesContent />
+        </div>
+      </AppShell>
+    );
+  }
+
+  // Público (deslogado, vindo da landing): cabeçalho simples + acesso ao login.
+  return (
+    <main className="mx-auto w-full max-w-2xl px-5 py-8">
+      <div className="mb-7 flex items-center justify-between">
+        <Link href="/" className="inline-flex items-center gap-2.5">
+          <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">
+            <Trophy className="size-4" />
+          </span>
+          <span className="font-serif text-base font-semibold tracking-tight">
+            S.M.M.A
+          </span>
+        </Link>
+        <Link
+          href="/login"
+          className="rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+        >
+          Entrar
+        </Link>
+      </div>
+      <RulesContent />
     </main>
   );
 }
