@@ -2,6 +2,14 @@
 
 > Onde paramos, como rodar e o que falta. Atualizado em 2026-06-09.
 
+> **ATUALIZAÇÃO 2026-06-10 (sessão de lançamento).** Produção 100% atualizada em `main` (sem branch pendente). Feito nesta sessão: deploy Fase 9 + Regras + Hub Copa + smoke test OK · **#14 cron ESPN** (repo tornado público + GitHub Actions + GitHub Secret `SUPABASE_DB_PASSWORD`) · **hardening** (backup `scripts/backup.mjs`, ensaio geral, alerta via Issue) · **analytics** (raio-x do jogador no /ranking + "palpites do grupo" nas cards) · **#15** admin de bônus + fix `score_bonus` (migration 0011) · **pivot: apuração de bônus 100% AUTOMÁTICA pela ESPN** — P1 `scripts/resolve-teams.mjs`, P2a (resolve mata-mata, já no cron), P2b `scripts/capture-goals.mjs` + migration 0012 `match_goals` (gols/artilheiro) · fix `/regras` sem navegação (extraído `src/components/app-shell.tsx`) · fix cards no mobile · banner WhatsApp `docs/banner-bolao.png`.
+>
+> **⚠️ ABERTO — launch-critical, antes de 11/jun:** o cron **AGENDADO** do GitHub é **não confiável** (disparou 1× e parou). Precisa de gatilho **automático e confiável** (recomendado: cron-job.org → API `workflow_dispatch` do GitHub a cada 10 min; alternativa: rota `/api/sync` na Vercel). Depois: plugar `capture-goals.mjs` no cron; **P3** derivar `tournament_outcome` (campeão=vencedor da final, vice, artilheiro=mais gols) + `teams.advanced_from_group` (times nos 16-avos) → roda `score_bonus()`; **P4** `/admin/bonus` vira read-only/override; melhorar o banner.
+>
+> **🚨 REGRAS DURAS DO USUÁRIO (inegociáveis):** (1) **ZERO processos manuais** de operação — tudo automático (só validação/correção é exceção); (2) comunicação em **português formal e correto** — sem gírias, contrações informais, emojis ou tom casual.
+>
+> **A memória do projeto (`project_bolao-copa-2026.md`) é a fonte MAIS ATUAL** sobre o estado da sessão.
+
 ## O que é
 Plataforma web de bolão da Copa do Mundo 2026 entre amigos (grupo **S.M.M.A**), valendo dinheiro. Mobile-first, **light / off-white + azul (Direção D)**, custo zero, integridade dos palpites garantida por RLS.
 
