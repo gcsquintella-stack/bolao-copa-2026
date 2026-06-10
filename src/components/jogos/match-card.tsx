@@ -194,31 +194,31 @@ export function MatchCard({
       )}
     >
       {/* cabeçalho: contexto + status */}
-      <div className="mb-3 flex items-center justify-between text-xs">
-        <span className="flex flex-wrap items-center gap-x-1.5 text-muted-foreground">
-          <span>
+      <div className="mb-3 flex items-center justify-between gap-2 text-xs">
+        <span className="flex min-w-0 items-center gap-x-1.5 text-muted-foreground">
+          <span className="flex-none">
             {match.stage === "group"
               ? `Grupo ${match.group_label}`
               : STAGE_LABEL[match.stage]}
           </span>
           {mult > 1 && (
-            <span className="rounded bg-primary/10 px-1.5 py-px text-[10px] font-extrabold text-primary">
+            <span className="flex-none rounded bg-primary/10 px-1.5 py-px text-[10px] font-extrabold text-primary">
               ×{multLabel}
             </span>
           )}
-          {match.venue && <span>· {match.venue}</span>}
+          {match.venue && <span className="truncate">· {match.venue}</span>}
         </span>
         {isLive ? (
-          <span className="inline-flex items-center gap-1.5 font-bold text-live">
+          <span className="inline-flex flex-none items-center gap-1.5 whitespace-nowrap font-bold text-live">
             <span className="size-1.5 animate-pulse rounded-full bg-live" />
             AO VIVO
           </span>
         ) : locked || isFinished ? (
-          <span className="inline-flex items-center gap-1 font-medium text-muted-foreground">
+          <span className="inline-flex flex-none items-center gap-1 whitespace-nowrap font-medium text-muted-foreground">
             <Lock className="size-3" /> Encerrado
           </span>
         ) : (
-          <span className="font-medium text-muted-foreground">
+          <span className="flex-none whitespace-nowrap font-medium text-muted-foreground">
             Fecha {brt.format(new Date(match.kickoff_at))}
           </span>
         )}
@@ -372,7 +372,7 @@ function TeamSide({
     <div
       className={cn(
         "flex min-w-0 items-center gap-2.5",
-        align === "right" && "flex-row-reverse justify-self-end",
+        align === "right" && "flex-row-reverse",
       )}
     >
       <Flag code={team?.code} name={team?.name} size={30} />
