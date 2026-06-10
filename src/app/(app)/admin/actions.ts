@@ -80,3 +80,42 @@ export async function updateScoring(
   revalidatePath("/admin/pontuacao");
   return { ok: true };
 }
+
+export type OutcomeValues = {
+  champion_team_id: number | null;
+  runner_up_team_id: number | null;
+  surprise_team_id: number | null;
+  top_scorer: string | null;
+};
+
+// Grava as respostas oficiais dos bônus (singleton tournament_outcome).
+// surprise_team_id em null => a revelação é calculada automaticamente no score_bonus.
+export async function setOutcome(
+  values: OutcomeValues,
+): Promise<ActionResult> {
+  const supabase = await createClient();
+  await assertAdmin(supabase);
+  const { error } = await supabase
+    .from("tournament_outcome")
+    .update({
+      champion_team_id: values.champion_team_id,
+      runner_up_team_id: values.runner_up_team_id,
+      surprise_team_id: values.surprise_team_id,
+      top_scorer: values.top_scorer?.trim() || null,
+    })
+    .eq("id", true);
+  if (error) return { error: error.message };
+  revalidatePath("/admin/bonus");
+  return { ok: true };
+}
+
+// Roda a apuração de todos os bônus (idempotente) e atualiza o ranking.
+export async function runScoreBonus(): Promise<ActionResult> {
+  const supabase = await createClient();
+  await assertAdmin(supabase);
+  const { error } = await supabase.rpc("score_bonus");
+  if (error) return { error: error.message };
+  revalidatePath("/ranking");
+  revalidatePath("/admin/bonus");
+  return { ok: true };
+}

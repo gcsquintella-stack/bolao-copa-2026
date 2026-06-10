@@ -6,21 +6,11 @@ import {
   useTransition,
   type ReactNode,
 } from "react";
-import { Select } from "@base-ui/react/select";
-import {
-  Check,
-  ChevronsUpDown,
-  Loader2,
-  Lock,
-  Medal,
-  Sparkles,
-  Target,
-  Trophy,
-} from "lucide-react";
+import { Loader2, Lock, Medal, Sparkles, Target, Trophy } from "lucide-react";
 import { saveBonus, type BonusPayload } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Flag } from "@/components/ui/flag";
+import { TeamSelect } from "@/components/ui/team-select";
 
 export type BonusTeam = {
   id: number;
@@ -41,64 +31,6 @@ type Props = {
   };
   locked: boolean;
 };
-
-function TeamSelect({
-  value,
-  onChange,
-  options,
-  disabled,
-}: {
-  value: number | null;
-  onChange: (v: number | null) => void;
-  options: BonusTeam[];
-  disabled: boolean;
-}) {
-  return (
-    <Select.Root value={value} onValueChange={(v) => onChange(v)} disabled={disabled}>
-      <Select.Trigger className="flex h-10 w-full min-w-0 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-medium shadow-sm outline-none transition-[box-shadow,border-color] focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 aria-expanded:border-primary disabled:opacity-60">
-        <Select.Value>
-          {(val) => {
-            const sel = options.find((t) => t.id === val);
-            return sel ? (
-              <span className="flex min-w-0 items-center gap-2">
-                <Flag code={sel.code} name={sel.name} size={20} />
-                <span className="truncate">{sel.name}</span>
-              </span>
-            ) : (
-              <span className="text-muted-foreground">Selecione…</span>
-            );
-          }}
-        </Select.Value>
-        <Select.Icon className="ml-auto flex-none text-muted-foreground">
-          <ChevronsUpDown className="size-4" />
-        </Select.Icon>
-      </Select.Trigger>
-      <Select.Portal>
-        <Select.Positioner sideOffset={6} className="z-50">
-          <Select.Popup className="max-h-72 min-w-[var(--anchor-width)] overflow-y-auto rounded-xl border border-border bg-popover p-1 text-sm text-popover-foreground shadow-lg outline-none">
-            <Select.List>
-              {options.map((t) => (
-                <Select.Item
-                  key={t.id}
-                  value={t.id}
-                  className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 outline-none data-[highlighted]:bg-secondary data-[selected]:font-semibold"
-                >
-                  <Flag code={t.code} name={t.name} size={20} />
-                  <Select.ItemText className="truncate">
-                    {t.name}
-                  </Select.ItemText>
-                  <Select.ItemIndicator className="ml-auto flex-none text-primary">
-                    <Check className="size-4" />
-                  </Select.ItemIndicator>
-                </Select.Item>
-              ))}
-            </Select.List>
-          </Select.Popup>
-        </Select.Positioner>
-      </Select.Portal>
-    </Select.Root>
-  );
-}
 
 function Field({
   icon,

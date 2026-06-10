@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ListChecks, SlidersHorizontal } from "lucide-react";
+import { ListChecks, SlidersHorizontal, Trophy } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -20,6 +20,12 @@ const ITEMS = [
     icon: SlidersHorizontal,
     title: "Pontuação",
     desc: "Ajuste pontos e multiplicadores (até o 1º jogo).",
+  },
+  {
+    href: "/admin/bonus",
+    icon: Trophy,
+    title: "Bônus",
+    desc: "Lance as respostas oficiais (campeão, vice, artilheiro…) e apure.",
   },
 ];
 
