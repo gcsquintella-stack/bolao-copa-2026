@@ -60,6 +60,21 @@ export function JogosClient({
     return map;
   }, [predictions]);
 
+  // Jogos já disputados de cada time (por código), para as médias do torneio.
+  const eventsByCode = useMemo(() => {
+    const m = new Map<string, string[]>();
+    for (const mt of matches) {
+      if (mt.status !== "finished" || !mt.espn_event_id) continue;
+      for (const t of [mt.home, mt.away]) {
+        if (!t?.code) continue;
+        const arr = m.get(t.code);
+        if (arr) arr.push(mt.espn_event_id);
+        else m.set(t.code, [mt.espn_event_id]);
+      }
+    }
+    return m;
+  }, [matches]);
+
   const todayBrt = brtDate.format(nowDate());
 
   const visible = useMemo(() => {
@@ -144,6 +159,8 @@ export function JogosClient({
                   initial={predByMatch.get(m.id) ?? null}
                   userId={userId}
                   scoring={scoring}
+                  homeEvents={m.home?.code ? eventsByCode.get(m.home.code) : undefined}
+                  awayEvents={m.away?.code ? eventsByCode.get(m.away.code) : undefined}
                 />
               </div>
             ))}

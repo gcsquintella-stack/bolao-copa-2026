@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Análise pré-jogo (ESPN, via /api/analise): probabilidade da linha de mercado,
-// forma recente (últimos 5) e confronto direto. Lazy-load ao abrir o painel;
-// dados públicos. Chaveado por código de time (ESPN abbr == teams.code), então
-// independe da orientação casa/fora nossa.
+// Análise pré-jogo (ESPN): probabilidade da linha de mercado, forma recente
+// (últimos 5), confronto direto e — Fase 2 — médias do torneio (posse,
+// finalizações, chutes no alvo). Lazy-load ao abrir; dados públicos. Chaveado
+// por código de time (ESPN abbr == teams.code), independe da orientação.
 
 type Form = { r: string; score: string };
 type Analysis = {
@@ -15,6 +15,7 @@ type Analysis = {
   form: Record<string, Form[]>;
   h2h: { games: { date: string; home: string; away: string; hs: string; as: string }[] };
 };
+type TeamAvg = { games: number; possession: number | null; shots: number | null; sot: number | null };
 
 const RES: Record<string, { label: string; cls: string }> = {
   W: { label: "V", cls: "bg-positive/15 text-positive" },
@@ -56,21 +57,54 @@ function FormRow({ name, games }: { name: string; games?: Form[] }) {
   );
 }
 
+function StatCmp({
+  label,
+  home,
+  away,
+  suffix = "",
+}: {
+  label: string;
+  home: number | null;
+  away: number | null;
+  suffix?: string;
+}) {
+  const both = home != null && away != null;
+  return (
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-xs tabular-nums">
+      <span className={cn("text-left", both && home! >= away! ? "font-bold" : "text-muted-foreground")}>
+        {home != null ? `${home}${suffix}` : "–"}
+      </span>
+      <span className="text-[11px] text-muted-foreground">{label}</span>
+      <span className={cn("text-right", both && away! >= home! ? "font-bold" : "text-muted-foreground")}>
+        {away != null ? `${away}${suffix}` : "–"}
+      </span>
+    </div>
+  );
+}
+
 export function MatchAnalysis({
   event,
   homeCode,
   awayCode,
   homeName,
   awayName,
+  homeEvents,
+  awayEvents,
 }: {
   event: string;
   homeCode: string;
   awayCode: string;
   homeName: string;
   awayName: string;
+  homeEvents?: string[];
+  awayEvents?: string[];
 }) {
   const [data, setData] = useState<Analysis | null>(null);
   const [err, setErr] = useState(false);
+  const [stats, setStats] = useState<Record<string, TeamAvg> | null>(null);
+
+  const heStr = (homeEvents ?? []).join(",");
+  const aeStr = (awayEvents ?? []).join(",");
 
   useEffect(() => {
     let alive = true;
@@ -82,6 +116,19 @@ export function MatchAnalysis({
       alive = false;
     };
   }, [event]);
+
+  useEffect(() => {
+    if (!heStr && !aeStr) return;
+    let alive = true;
+    const p = new URLSearchParams({ home: homeCode, away: awayCode, he: heStr, ae: aeStr });
+    fetch(`/api/analise/times?${p.toString()}`)
+      .then((r) => r.json())
+      .then((j: Record<string, TeamAvg>) => alive && setStats(j))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [homeCode, awayCode, heStr, aeStr]);
 
   if (err) {
     return (
@@ -104,8 +151,11 @@ export function MatchAnalysis({
   const dp = prob?.draw ?? 0;
   const hasForm = Object.keys(data.form).length > 0;
   const games = data.h2h?.games ?? [];
+  const sh = stats?.[homeCode];
+  const sa = stats?.[awayCode];
+  const hasAvg = (sh?.games ?? 0) > 0 || (sa?.games ?? 0) > 0;
 
-  if (hp == null && ap == null && !hasForm && games.length === 0) {
+  if (hp == null && ap == null && !hasForm && games.length === 0 && !hasAvg) {
     return (
       <div className="mt-3 border-t border-border pt-3 text-center text-xs text-muted-foreground">
         Sem análise para este jogo ainda.
@@ -135,6 +185,19 @@ export function MatchAnalysis({
               {ap}% {awayName}
             </span>
           </div>
+        </div>
+      )}
+
+      {hasAvg && (
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span className="min-w-0 truncate font-medium text-foreground">{homeName}</span>
+            <span>médias no torneio</span>
+            <span className="min-w-0 truncate text-right font-medium text-foreground">{awayName}</span>
+          </div>
+          <StatCmp label="Posse" home={sh?.possession ?? null} away={sa?.possession ?? null} suffix="%" />
+          <StatCmp label="Finalizações" home={sh?.shots ?? null} away={sa?.shots ?? null} />
+          <StatCmp label="No alvo" home={sh?.sot ?? null} away={sa?.sot ?? null} />
         </div>
       )}
 

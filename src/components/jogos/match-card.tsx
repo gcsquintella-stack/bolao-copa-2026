@@ -32,11 +32,15 @@ export function MatchCard({
   initial,
   userId,
   scoring,
+  homeEvents,
+  awayEvents,
 }: {
   match: MatchRow;
   initial: PredictionRow | null;
   userId: string;
   scoring: ScoringConfig;
+  homeEvents?: string[];
+  awayEvents?: string[];
 }) {
   const supabase = createClient();
   const locked = isKickoffPassed(match.kickoff_at);
@@ -308,6 +312,8 @@ export function MatchCard({
               awayCode={match.away.code}
               homeName={match.home.name}
               awayName={match.away.name}
+              homeEvents={homeEvents}
+              awayEvents={awayEvents}
             />
           )}
         </div>
