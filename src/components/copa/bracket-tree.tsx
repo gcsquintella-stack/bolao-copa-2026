@@ -288,7 +288,7 @@ export function BracketTree({ data }: { data: BracketData }) {
 
       <div
         ref={scrollRef}
-        className="max-h-[70vh] cursor-grab select-none overflow-auto pb-2"
+        className="no-scrollbar max-h-[70vh] cursor-grab select-none overflow-auto pb-2"
       >
         <div ref={innerRef} className="relative flex w-max">
           <svg ref={svgRef} className="pointer-events-none absolute inset-0" aria-hidden />

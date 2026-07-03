@@ -160,6 +160,15 @@
   font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
+/* Esconde a barra de rolagem mantendo o scroll (visor do chaveamento). */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Edge legado */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome / Safari / Edge */
+}
+
 /* ---- motion / deleite (Fase 9.5) ---- */
 @keyframes fade-up {
   from {
