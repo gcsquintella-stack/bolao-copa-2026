@@ -5,10 +5,10 @@ import { Flag } from "@/components/ui/flag";
 import { cn } from "@/lib/utils";
 
 // Chaveamento em árvore, visual e interativo. Cada vaga mostra o time definido,
-// o candidato "provável" (líder atual do grupo) ou o par de seleções que disputam
-// a vaga ("venc. A × B"). Conectores SVG desenhados imperativamente (medindo as
-// cards) para não cair na regra set-state-in-effect. Tocar num confronto destaca
-// o caminho e lista, no painel, quem ainda pode chegar àquela vaga.
+// o candidato "Provável", o par que disputa a vaga ("Venc. A × B") ou pendente.
+// Conectores SVG desenhados imperativamente (medindo as cards). Visor de altura
+// limitada, com cabeçalhos de fase fixos no topo (sticky) e arrastar-para-mover;
+// tocar num confronto destaca o caminho e lista quem ainda pode chegar à vaga.
 
 export type BracketTeam = { name: string; code: string | null };
 
@@ -21,15 +21,29 @@ export type BracketMatch = {
   id: string;
   feeds: string | null;
   round: number;
-  label?: string;
   status?: "scheduled" | "live" | "finished";
-  terminal?: boolean;
+  kickoff?: string; // ISO UTC
   home: BracketSlot;
   away: BracketSlot;
   teams?: string[]; // seleções que ainda podem chegar a esta vaga (painel)
 };
 
 export type BracketData = { rounds: string[]; matches: BracketMatch[] };
+
+const dfDay = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  day: "2-digit",
+  month: "short",
+});
+const dfTime = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+function fmtKickoff(iso: string) {
+  const d = new Date(iso);
+  return `${dfDay.format(d).replace(" de ", " ")} · ${dfTime.format(d)}`;
+}
 
 function MiniTeam({ t }: { t: BracketTeam }) {
   return (
@@ -96,10 +110,12 @@ function SlotRow({ slot }: { slot: BracketSlot }) {
 }
 
 export function BracketTree({ data }: { data: BracketData }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const cardRefs = useRef(new Map<string, HTMLDivElement>());
   const drawRef = useRef<() => void>(() => {});
+  const draggedRef = useRef(false);
   const [selected, setSelected] = useState<string | null>(null);
 
   const byId = useMemo(() => {
@@ -188,6 +204,55 @@ export function BracketTree({ data }: { data: BracketData }) {
     };
   }, []);
 
+  // Arrastar-para-mover (mouse). No toque, o scroll nativo já resolve. Suprime o
+  // clique de seleção quando houve arrasto (draggedRef).
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let down = false;
+    let moved = false;
+    let sx = 0;
+    let sy = 0;
+    let sl = 0;
+    let st = 0;
+    const onDown = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      down = true;
+      moved = false;
+      sx = e.clientX;
+      sy = e.clientY;
+      sl = el.scrollLeft;
+      st = el.scrollTop;
+    };
+    const onMove = (e: MouseEvent) => {
+      if (!down) return;
+      const dx = e.clientX - sx;
+      const dy = e.clientY - sy;
+      if (!moved && Math.hypot(dx, dy) > 5) {
+        moved = true;
+        draggedRef.current = true;
+        el.style.cursor = "grabbing";
+      }
+      if (moved) {
+        el.scrollLeft = sl - dx;
+        el.scrollTop = st - dy;
+      }
+    };
+    const onUp = () => {
+      down = false;
+      el.style.cursor = "";
+      if (moved) setTimeout(() => (draggedRef.current = false), 0);
+    };
+    el.addEventListener("mousedown", onDown);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      el.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, []);
+
   const rounds = useMemo(() => {
     const cols: BracketMatch[][] = data.rounds.map(() => []);
     for (const m of data.matches) (cols[m.round] ??= []).push(m);
@@ -195,6 +260,7 @@ export function BracketTree({ data }: { data: BracketData }) {
   }, [data]);
 
   function toggle(id: string) {
+    if (draggedRef.current) return;
     setSelected((s) => (s === id ? null : id));
   }
 
@@ -220,38 +286,21 @@ export function BracketTree({ data }: { data: BracketData }) {
         </span>
       </div>
 
-      <div className="overflow-x-auto pb-2">
+      <div
+        ref={scrollRef}
+        className="max-h-[70vh] cursor-grab select-none overflow-auto pb-2"
+      >
         <div ref={innerRef} className="relative flex w-max">
           <svg ref={svgRef} className="pointer-events-none absolute inset-0" aria-hidden />
           {rounds.map((col, ri) => (
             <div key={ri} className="flex w-[204px] flex-none flex-col px-2.5">
-              <div className="mb-2 text-center text-[11px] font-medium text-muted-foreground">
+              <div className="sticky top-0 z-20 mb-2 border-b border-border bg-background py-1.5 text-center text-[11px] font-semibold text-muted-foreground">
                 {data.rounds[ri]}
               </div>
               <div className="flex flex-1 flex-col justify-around gap-3">
                 {col.map((m) => {
                   const isSel = selected === m.id;
                   const dim = active != null && !active.has(m.id);
-                  if (m.terminal) {
-                    return (
-                      <div
-                        key={m.id}
-                        ref={(el) => {
-                          if (el) cardRefs.current.set(m.id, el);
-                          else cardRefs.current.delete(m.id);
-                        }}
-                        className={cn(
-                          "flex items-center gap-2 rounded-xl border border-dashed border-border bg-secondary/40 p-2.5",
-                          dim && "opacity-30",
-                        )}
-                      >
-                        <span className="grid size-6 flex-none place-items-center rounded-full bg-primary/10 text-primary">
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3" /></svg>
-                        </span>
-                        <span className="text-[13px] font-semibold">Final</span>
-                      </div>
-                    );
-                  }
                   return (
                     <div
                       key={m.id}
@@ -275,16 +324,18 @@ export function BracketTree({ data }: { data: BracketData }) {
                         dim && "opacity-30",
                       )}
                     >
-                      {(m.status === "live" || m.status === "finished") && (
-                        <div className="mb-1 flex justify-end text-[10px] text-muted-foreground">
+                      {(m.status === "live" || m.status === "finished" || m.kickoff) && (
+                        <div className="mb-1 flex items-center gap-1 text-[10px] text-muted-foreground">
                           {m.status === "live" ? (
                             <span className="inline-flex items-center gap-1 font-bold text-live">
                               <span className="size-1.5 rounded-full bg-live" />
                               AO VIVO
                             </span>
-                          ) : (
+                          ) : m.status === "finished" ? (
                             <span>Encerrado</span>
-                          )}
+                          ) : m.kickoff ? (
+                            <span className="tabular-nums">{fmtKickoff(m.kickoff)}</span>
+                          ) : null}
                         </div>
                       )}
                       <SlotRow slot={m.home} />

@@ -144,6 +144,7 @@ export function toBracketData(knockout: MatchRow[], standings: Standings): Brack
       feeds: feedsOf.get(m.id) ?? null,
       status:
         m.status === "live" ? "live" : m.status === "finished" ? "finished" : "scheduled",
+      kickoff: m.kickoff_at,
       home: resolveSlot(m, "home", koById, standings),
       away: resolveSlot(m, "away", koById, standings),
       teams: [
