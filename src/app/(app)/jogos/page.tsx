@@ -24,7 +24,7 @@ export default async function JogosPage() {
       supabase
         .from("matches")
         .select(
-          "id, stage, group_label, home_label, away_label, kickoff_at, venue, status, home_score, away_score, home:teams!home_team_id(name,code,flag), away:teams!away_team_id(name,code,flag)",
+          "id, stage, group_label, home_label, away_label, kickoff_at, venue, status, home_score, away_score, espn_event_id, home:teams!home_team_id(name,code,flag), away:teams!away_team_id(name,code,flag)",
         )
         .order("kickoff_at", { ascending: true })
         .order("id", { ascending: true }),
@@ -50,6 +50,7 @@ export default async function JogosPage() {
     status: m.status,
     home_score: m.home_score,
     away_score: m.away_score,
+    espn_event_id: m.espn_event_id,
   }));
 
   const predictions = (preds ?? []) as PredictionRow[];

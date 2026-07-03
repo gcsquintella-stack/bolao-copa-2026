@@ -19,6 +19,7 @@ export type MatchRow = {
   status: "scheduled" | "live" | "finished" | "postponed" | "void";
   home_score: number | null;
   away_score: number | null;
+  espn_event_id?: string | null;
 };
 
 export type PredictionRow = {

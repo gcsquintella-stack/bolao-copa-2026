@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, Loader2, Lock, Minus, Plus, Users } from "lucide-react";
+import { BarChart3, Check, Loader2, Lock, Minus, Plus, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Flag } from "@/components/ui/flag";
@@ -14,6 +14,7 @@ import {
 } from "@/lib/scoring";
 import { STAGE_LABEL, type MatchRow, type PredictionRow } from "./types";
 import { MatchConsensus } from "./match-consensus";
+import { MatchAnalysis } from "./match-analysis";
 
 const brt = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "America/Sao_Paulo",
@@ -53,6 +54,7 @@ export function MatchCard({
   // true no sucesso e nunca volta a false ao editar -> sem flicker.
   const [saved, setSaved] = useState(initial != null);
   const [showGroup, setShowGroup] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
   const existsRef = useRef(initial != null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savingRef = useRef(false);
@@ -286,6 +288,30 @@ export function MatchCard({
           </span>
         )}
       </div>
+
+      {/* análise do jogo (ESPN): probabilidade, forma recente, confronto direto */}
+      {match.espn_event_id && match.home?.code && match.away?.code && (
+        <div className="mt-1">
+          <button
+            type="button"
+            onClick={() => setShowAnalysis((v) => !v)}
+            aria-expanded={showAnalysis}
+            className="flex w-full items-center justify-center gap-1.5 rounded-md py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <BarChart3 className="size-3.5" />
+            {showAnalysis ? "ocultar análise" : "ver análise"}
+          </button>
+          {showAnalysis && (
+            <MatchAnalysis
+              event={match.espn_event_id}
+              homeCode={match.home.code}
+              awayCode={match.away.code}
+              homeName={match.home.name}
+              awayName={match.away.name}
+            />
+          )}
+        </div>
+      )}
 
       {/* palpites do grupo — só depois do apito (RLS libera os palpites alheios) */}
       {locked && (

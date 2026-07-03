@@ -37,6 +37,7 @@ export async function proxy(request: NextRequest) {
     path === "/" ||
     path === "/login" ||
     path === "/regras" ||
+    path.startsWith("/api/analise") || // dados públicos da ESPN (análise pré-jogo)
     path.startsWith("/auth");
 
   // Deslogado tentando acessar área protegida -> login
