@@ -3,16 +3,15 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Standings } from "./standings";
-import { Bracket } from "./bracket";
+import { BracketTree, type BracketData } from "./bracket-tree";
 import type { StandingRow } from "@/lib/standings";
-import type { MatchRow } from "@/components/jogos/types";
 
 export function CopaTabs({
   groups,
-  knockout,
+  bracket,
 }: {
   groups: { group: string; rows: StandingRow[] }[];
-  knockout: MatchRow[];
+  bracket: BracketData;
 }) {
   const [tab, setTab] = useState<"grupos" | "mata">("grupos");
 
@@ -39,7 +38,7 @@ export function CopaTabs({
       {tab === "grupos" ? (
         <Standings groups={groups} />
       ) : (
-        <Bracket matches={knockout} />
+        <BracketTree data={bracket} />
       )}
     </div>
   );

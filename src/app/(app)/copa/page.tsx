@@ -7,6 +7,7 @@ import {
   type StandingTeam,
 } from "@/lib/standings";
 import type { MatchRow, TeamRef } from "@/components/jogos/types";
+import { toBracketData } from "@/lib/bracket-view";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,8 @@ export default async function CopaPage() {
     away_score: m.away_score,
   }));
 
+  const bracket = toBracketData(knockout, groups);
+
   return (
     <div className="flex flex-col gap-5">
       <RealtimeRefresher />
@@ -71,7 +74,7 @@ export default async function CopaPage() {
         </p>
       </header>
 
-      <CopaTabs groups={groups} knockout={knockout} />
+      <CopaTabs groups={groups} bracket={bracket} />
     </div>
   );
 }
